@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zer0 Day AI — News, Enciclopedia & Confronto LLM</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            mono: {
+              50: '#f6f6f6',
+              100: '#e7e7e7',
+              200: '#d1d1d1',
+              300: '#b0b0b0',
+              400: '#888888',
+              500: '#6d6d6d',
+              600: '#5d5d5d',
+              700: '#4f4f4f',
+              800: '#2d2d2d',
+              850: '#222222',
+              900: '#171717',
+              950: '#0d0d0d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0d0d0d; }
+    ::-webkit-scrollbar-thumb { background: #2d2d2d; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+  </style>
+</head>
+<body class="bg-mono-950 text-mono-100 font-sans min-h-screen flex flex-col antialiased relative selection:bg-mono-100 selection:text-mono-950">
+
+  <!-- MODAL DETTAGLI IA -->
+  <div id="detail-modal-backdrop" onclick="closeModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 transition-all duration-300">
+    <div onclick="event.stopPropagation()" class="bg-mono-900 border border-mono-700/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative transform transition-all scale-100 max-h-[92vh] overflow-y-auto">
+      
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-mono-400 hover:text-mono-100 bg-mono-800 hover:bg-mono-700 w-8 h-8 rounded-full flex items-center justify-center text-xs transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span id="modal-type" class="text-[10px] uppercase font-mono tracking-wider bg-mono-800 text-mono-200 px-2.5 py-1 rounded-md border border-mono-700 font-medium"></span>
+        <span class="text-[10px] uppercase font-mono tracking-wider bg-mono-850 text-mono-400 px-2.5 py-1 rounded-md border border-mono-800">TESTO / LLM</span>
+        <span id="modal-deploy" class="text-[10px] uppercase font-mono tracking-wider text-mono-300 bg-mono-950 border border-mono-800 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+          <i id="modal-deploy-icon" class="fa-solid text-[9px]"></i>
+          <span id="modal-deploy-text"></span>
+        </span>
+      </div>
+
+      <h2 id="modal-title" class="text-2xl font-bold text-mono-50 tracking-tight mb-0.5"></h2>
+      <p id="modal-dev" class="text-xs font-mono text-mono-400 mb-5"></p>
+
+      <div class="space-y-5 border-t border-mono-800 pt-4">
+        <div>
+          <h4 class="text-[10px] font-mono text-mono-500 uppercase tracking-widest mb-1.5 font-medium">Panoramica Generale</h4>
+          <p id="modal-desc" class="text-xs text-mono-200 leading-relaxed font-normal"></p>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-[10px] font-mono text-mono-400 uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-microchip text-mono-300"></i> Specifiche Tecniche & Architettura
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="bg-mono-950 border border-mono-800 rounded-xl p-3.5 space-y-2">
+              <div class="flex items-center space-x-2 text-mono-200 text-xs font-semibold font-mono">
+                <i class="fa-solid fa-brain text-mono-400"></i>
+                <span>Architecture</span>
+              </div>
+              <ul id="specs-architecture" class="space-y-1.5 text-xs text-mono-300"></ul>
+            </div>
+
+            <div class="bg-mono-950 border border-mono-800 rounded-xl p-3.5 space-y-2">
+              <div class="flex items-center space-x-2 text-mono-200 text-xs font-semibold font-mono">
+                <i class="fa-solid fa-globe text-mono-400"></i>
+                <span>Language Support</span>
+              </div>
+              <ul id="specs-language" class="space-y-1.5 text-xs text-mono-300"></ul>
+            </div>
+
+            <div class="bg-mono-950 border border-mono-800 rounded-xl p-3.5 space-y-2">
+              <div class="flex items-center space-x-2 text-mono-200 text-xs font-semibold font-mono">
+                <i class="fa-solid fa-code text-mono-400"></i>
+                <span>Programming & Coding</span>
+              </div>
+              <ul id="specs-programming" class="space-y-1.5 text-xs text-mono-300"></ul>
+            </div>
+
+            <div class="bg-mono-950 border border-mono-800 rounded-xl p-3.5 space-y-2">
+              <div class="flex items-center space-x-2 text-mono-200 text-xs font-semibold font-mono">
+                <i class="fa-solid fa-server text-mono-400"></i>
+                <span>Hardware & Deployment</span>
+              </div>
+              <ul id="specs-hardware" class="space-y-1.5 text-xs text-mono-300"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY SIDEBAR -->
+  <div id="sidebar-overlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+
+  <!-- SIDEBAR MENU LATERALE -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-mono-900 border-r border-mono-800 z-50 transform -translate-x-full transition-transform duration-200 ease-in-out p-5 flex flex-col justify-between shadow-2xl">
+    <div>
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-mono-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-6 h-6 rounded bg-mono-100 text-mono-950 font-bold flex items-center justify-center text-xs">0</div>
+          <span class="font-semibold text-mono-50 tracking-tight text-sm">ZER0 DAY AI</span>
+        </div>
+        <button onclick="toggleSidebar(false)" class="text-mono-400 hover:text-mono-100 text-sm p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Navigazione Principale -->
+      <nav class="space-y-1.5 text-xs">
+        <button id="nav-models" onclick="switchPage('models')" class="w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-50 bg-mono-800 transition flex items-center justify-between">
+          <span>Modelli LLM Esistenti</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-mono-500"></i>
+        </button>
+        <button id="nav-upcoming" onclick="switchPage('upcoming')" class="w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-400 hover:bg-mono-850 hover:text-mono-100 transition flex items-center justify-between">
+          <span>Prossimi LLM in Arrivo</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-mono-500"></i>
+        </button>
+        <button onclick="openCompareModal()" class="w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-300 hover:bg-mono-850 hover:text-mono-100 transition flex items-center justify-between border-t border-mono-800/60 mt-3 pt-3">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-code-compare text-mono-400"></i> <span>Confronto</span></span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-mono-500"></i>
+        </button>
+      </nav>
+    </div>
+
+    <div class="text-[10px] font-mono text-mono-500 border-t border-mono-850 pt-3 flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Live Feed Attivo</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BARRA SUPERIORE UNIFICATA -->
+  <header class="border-b border-mono-800 bg-mono-900 sticky top-0 z-40 py-2.5">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
+      
+      <div class="flex items-center space-x-3">
+        <button onclick="toggleSidebar(true)" class="text-mono-300 hover:text-mono-100 border border-mono-800 bg-mono-850 px-2.5 py-1.5 rounded-md text-xs transition flex items-center justify-center gap-2 group">
+          <i class="fa-solid fa-bars text-mono-400 group-hover:text-mono-100"></i>
+          <span class="text-[11px] font-medium hidden sm:inline">Menu</span>
+        </button>
+
+        <div class="h-4 w-[1px] bg-mono-800"></div>
+
+        <h1 id="page-header-title" class="text-sm sm:text-base font-normal text-mono-50 tracking-tight whitespace-nowrap">
+          Zer0 Day AI • News & LLM
+        </h1>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <div id="header-search-container" class="relative w-48 sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-mono-500 text-xs"></i>
+          <input type="text" id="searchInput" placeholder="Cerca tra gli LLM..." 
+            class="w-full bg-mono-950 border border-mono-800 rounded-lg py-1.5 pl-9 pr-3 text-xs text-mono-100 placeholder-mono-500 focus:outline-none focus:border-mono-600 transition">
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- PAGINA 1: MODELLI IA DI TESTO -->
+  <div id="page-models" class="flex-grow flex flex-col">
+    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-grow">
+      <section>
+        <div class="flex justify-between items-center mb-5">
+          <span class="text-[10px] font-mono text-mono-500 uppercase" id="model-count-label">Caricamento modelli LLM...</span>
+          
+          <div class="flex flex-wrap gap-1" id="filterContainer">
+            <button onclick="filterCategory('all', this)" class="filter-btn bg-mono-100 text-mono-950 px-2.5 py-1 rounded text-[11px] font-medium transition">Tutti gli LLM</button>
+            <button onclick="filterCategory('Proprietario', this)" class="filter-btn bg-mono-850 text-mono-400 border border-mono-800 hover:text-mono-100 px-2.5 py-1 rounded text-[11px] transition">Proprietari</button>
+            <button onclick="filterCategory('Open Source', this)" class="filter-btn bg-mono-850 text-mono-400 border border-mono-800 hover:text-mono-100 px-2.5 py-1 rounded text-[11px] transition">Open Source</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="aiGrid">
+          <!-- Carte via JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PAGINA 2: PROSSIMI LLM IN ARRIVO -->
+  <div id="page-upcoming" class="flex-grow flex-col hidden">
+    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-grow">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="upcomingGrid">
+        <!-- Carte via JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- SCHERMATA POPUP DI CONFRONTO -->
+  <div id="compare-modal-backdrop" onclick="closeCompareModal()" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div onclick="event.stopPropagation()" class="bg-mono-900 border border-mono-700/80 rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+      
+      <button onclick="closeCompareModal()" class="absolute top-5 right-5 text-mono-400 hover:text-mono-100 bg-mono-800 hover:bg-mono-700 w-8 h-8 rounded-full flex items-center justify-center text-xs transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center space-x-2 mb-1">
+        <span class="text-[10px] uppercase font-mono tracking-wider bg-mono-800 text-mono-200 px-2.5 py-1 rounded-md border border-mono-700 font-medium">ZER0 LAB</span>
+      </div>
+      <h2 class="text-xl font-bold text-mono-50 tracking-tight mb-4">Confronto Diretto Modelli LLM</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-mono-950 p-4 rounded-xl border border-mono-800">
+        <div>
+          <label class="block text-[10px] font-mono text-mono-400 uppercase mb-1 font-medium">Seleziona Modello A</label>
+          <select id="compare-select-1" onchange="updateComparison()" class="w-full bg-mono-900 border border-mono-700 rounded-lg p-2.5 text-xs text-mono-100 focus:outline-none focus:border-mono-500 font-mono">
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono text-mono-400 uppercase mb-1 font-medium">Seleziona Modello B</label>
+          <select id="compare-select-2" onchange="updateComparison()" class="w-full bg-mono-900 border border-mono-700 rounded-lg p-2.5 text-xs text-mono-100 focus:outline-none focus:border-mono-500 font-mono">
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="compare-results-grid">
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-mono-800 bg-mono-900 py-4 text-center text-[11px] text-mono-500 mt-auto">
+    <p>© 2026 Zer0 Day AI • Real-time LLM Intelligence & Specs</p>
+  </footer>
+
+  <script>
+    const officialAiData = [
+      { 
+        id: 'chatgpt', 
+        name: 'ChatGPT (GPT-4o)', 
+        dev: 'OpenAI', 
+        type: 'Proprietario', 
+        deploy: 'Cloud',
+        hardware: 'Nessun Requisito (Web / API)',
+        hosting: 'Cloud Server OpenAI',
+        desc: 'Modello multimodale nativo di OpenAI specializzato in generazione di testo, ragionamento complesso e analisi di documenti.', 
+        arch: ['Flagship Multimodal Architecture', 'Single-node & Cloud inference', 'Real-time voice & vision', '128k context window'],
+        lang: ['Multilingual capabilities', 'English, Spanish, Italian', 'French, German, Chinese', '50+ natural languages'],
+        prog: ['Python, JavaScript, C++', 'Advanced Code Interpreter', 'Excels in logic & refactoring', 'API Function Calling'],
+        hw: ['Cloud Managed (OpenAI)', 'Zero local hardware required', 'Instant API scaling', 'Commercial license'],
+      },
+      { 
+        id: 'claude', 
+        name: 'Claude 3.5 Sonnet', 
+        dev: 'Anthropic', 
+        type: 'Proprietario', 
+        deploy: 'Cloud',
+        hardware: 'Nessun Requisito (Web / API)',
+        hosting: 'Cloud Server Anthropic',
+        desc: 'Punto di riferimento mondiale nei benchmark di scrittura codice, analisi sintattica e ragionamento analitico.', 
+        arch: ['Advanced Transformer', 'Long-context applications', 'Artifacts engine enabled', '200k context window'],
+        lang: ['Native multilingual support', 'High fluency in European languages', 'Advanced semantic nuance', 'Complex translation tasks'],
+        prog: ['Leader in software engineering', 'Full stack code generation', 'Real-time UI preview (Artifacts)', 'Desktop control (Computer Use)'],
+        hw: ['Anthropic Cloud Infrastructure', 'Secure enterprise API', 'Zero local setup required', 'Strict safety guardrails'],
+      },
+      { 
+        id: 'deepseek-r1', 
+        name: 'DeepSeek-R1', 
+        dev: 'DeepSeek', 
+        type: 'Open Source', 
+        deploy: 'Locale / Cloud',
+        hardware: 'Min. 16GB VRAM (Quantized)',
+        hosting: 'Esecuzione Locale (Ollama) / Cloud API',
+        desc: 'Modello di ragionamento aperto basato su Reinforcement Learning, altamente specializzato in matematica, fisica e logica.', 
+        arch: ['Reinforcement Learning Core', 'Chain-of-Thought transparency', 'Optimized reasoning engine', '64k context window'],
+        lang: ['Strong multilingual reasoning', 'English & Chinese proficiency', 'Technical translation', 'Code documentation generation'],
+        prog: ['Advanced mathematical logic', 'Algorithm optimization', 'Python & C++ code reasoning', 'Open weights for fine-tuning'],
+        hw: ['Min. 16GB VRAM (Q4 Local)', 'Supports Ollama & LM Studio', 'API hosting available', 'Open-source research license'],
+      },
+      { 
+        id: 'llama-31-405b', 
+        name: 'Llama 3.1 405B', 
+        dev: 'Meta AI', 
+        type: 'Open Source', 
+        deploy: 'Locale / Server',
+        hardware: '8x GPU H100/A100 (80GB VRAM)',
+        hosting: 'Server Dedicato / Cloud Host',
+        desc: 'Il più imponente LLM aperto mai rilasciato da Meta, ideale per infrastrutture aziendali e distillazione di modelli minori.', 
+        arch: ['405 Billion parameters', 'Dense Transformer model', 'Enterprise scale inference', '128k context window'],
+        lang: ['8 major world languages', 'Robust cross-lingual transfer', 'Cultural nuance understanding', 'Extensive tokenizer coverage'],
+        prog: ['Complex code generation', 'Agentic workflow support', 'Dataset synthesis & distillation', 'Multi-paradigm programming'],
+        hw: ['Multi-node GPU cluster required', 'Enterprise self-hosting', 'Commercial friendly license', 'Full model weights access'],
+      },
+      { 
+        id: 'gemini-15-pro', 
+        name: 'Gemini 1.5 Pro', 
+        dev: 'Google DeepMind', 
+        type: 'Proprietario', 
+        deploy: 'Cloud',
+        hardware: 'Nessun Requisito (Cloud Google)',
+        hosting: 'Google Cloud / AI Studio',
+        desc: 'LLM di Google dotato della finestra di contesto più grande del settore per l analisi di grandi basi di conoscenza.', 
+        arch: ['MoE Architecture variant', 'Ultra-long context engine', 'Native multimodal ingestion', '2,000k context window'],
+        lang: ['Comprehensive global coverage', 'Real-time translation', 'Multilingual audio/video parsing', '100+ languages supported'],
+        prog: ['Entire codebase analysis', 'Cross-file debugging', 'API ecosystem integration', 'Python & Go optimization'],
+        hw: ['Google Cloud Infrastructure', 'AI Studio developer access', 'Managed API service', 'Enterprise security compliance'],
+      },
+      { 
+        id: 'mistral-large', 
+        name: 'Mistral Large 2', 
+        dev: 'Mistral AI', 
+        type: 'Proprietario', 
+        deploy: 'Cloud / Server',
+        hardware: 'Cloud API / Instanze Dedicated Cloud',
+        hosting: 'Mistral La Plateforme / AWS',
+        desc: 'Modello europeo di punta ottimizzato per la sintesi multilingua nativa e il ragionamento logico rigoroso.', 
+        arch: ['Top-tier European LLM', 'Optimized parameter count', 'Strict JSON mode output', '128k context window'],
+        lang: ['French, German, Spanish, Italian', 'English, Chinese, Japanese', 'Native European compliance', 'High-accuracy translation'],
+        prog: ['Rigorous function calling', 'JSON syntax enforcement', 'Clean code synthesis', 'Multi-step agent tasks'],
+        hw: ['Mistral La Plateforme', 'Cloud Dedicated instances', 'AWS Bedrock integration', 'Enterprise licensing'],
+      },
+      { 
+        id: 'qwen-25-72b', 
+        name: 'Qwen 2.5 72B', 
+        dev: 'Alibaba Cloud', 
+        type: 'Open Source', 
+        deploy: 'Locale / Server',
+        hardware: 'Min. 32GB VRAM (Quantized)',
+        hosting: 'Esecuzione Locale / Cloud API',
+        desc: 'LLM open-source che si posiziona ai vertici mondiali per capacità matematiche, comprensione del testo e coding.', 
+        arch: ['72 Billion parameters', 'Dense causal language model', 'Enhanced knowledge base', '128k context window'],
+        lang: ['29+ supported languages', 'Strong bilingual focus (EN/ZH)', 'Multilingual code comments', 'Broad regional support'],
+        prog: ['Top open coding benchmarks', 'Math problem solving', 'SQL & Python generation', 'Algorithm implementation'],
+        hw: ['Min. 32GB VRAM (Q4 Local)', 'Compatible with vLLM & Ollama', 'Open weights distribution', 'Permissive research license'],
+      }
+    ];
+
+    const officialUpcomingData = [
+      { 
+        id: 'gpt5', 
+        name: 'GPT-5 (Orion)', 
+        dev: 'OpenAI', 
+        launch: 'Q3/Q4 2026', 
+        type: 'Proprietario',
+        deploy: 'Cloud',
+        hardware: 'Infrastruttura Cloud OpenAI',
+        hosting: 'Cluster Azure Supercomputer',
+        status: 'Fase di Red Teaming e Test di Sicurezza', 
+        desc: 'La prossima generazione di LLM targata OpenAI, focalizzata sul ragionamento autonomo continuo e la riduzione delle allucinazioni.', 
+      },
+      { 
+        id: 'claude-35-opus', 
+        name: 'Claude 3.5 Opus', 
+        dev: 'Anthropic', 
+        launch: 'In arrivo', 
+        type: 'Proprietario',
+        deploy: 'Cloud',
+        hardware: 'Infrastruttura Cloud Anthropic',
+        hosting: 'Cloud Server Anthropic',
+        status: 'Valutazione Interna di Benchmark', 
+        desc: 'Modello LLM di punta della serie 3.5 per compiti complessi di architettura software e ricerca accademica.', 
+      },
+      { 
+        id: 'llama-4', 
+        name: 'Llama 4', 
+        dev: 'Meta AI', 
+        launch: '2026', 
+        type: 'Open Source',
+        deploy: 'Locale / Server',
+        hardware: 'GPU Locale / Server Multi-Node',
+        hosting: 'Download Open-Weights',
+        status: 'Cluster 100K+ GPU H100', 
+        desc: 'Prossima versione aperta della famiglia Llama con architettura di linguaggio nativamente ottimizzata.', 
+      }
+    ];
+
+    function openModal(id) {
+      const item = officialAiData.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('modal-title').innerText = item.name;
+      document.getElementById('modal-dev').innerText = `Sviluppatore: ${item.dev}`;
+      document.getElementById('modal-type').innerText = item.type;
+      
+      const deployIcon = document.getElementById('modal-deploy-icon');
+      const deployText = document.getElementById('modal-deploy-text');
+      deployText.innerText = item.deploy;
+      deployIcon.className = item.deploy.toLowerCase().includes('locale') ? 'fa-solid fa-desktop text-emerald-400 text-[9px]' : 'fa-solid fa-cloud text-mono-400 text-[9px]';
+
+      document.getElementById('modal-desc').innerText = item.desc;
+      
+      document.getElementById('specs-architecture').innerHTML = item.arch.map(a => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[9px] text-mono-400"></i><span>${a}</span></li>`).join('');
+      document.getElementById('specs-language').innerHTML = item.lang.map(l => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[9px] text-mono-400"></i><span>${l}</span></li>`).join('');
+      document.getElementById('specs-programming').innerHTML = item.prog.map(p => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[9px] text-mono-400"></i><span>${p}</span></li>`).join('');
+      document.getElementById('specs-hardware').innerHTML = item.hw.map(h => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[9px] text-mono-400"></i><span>${h}</span></li>`).join('');
+
+      document.getElementById('detail-modal-backdrop').classList.remove('hidden');
+    }
+
+    function openCompareModal() {
+      toggleSidebar(false);
+      const select1 = document.getElementById('compare-select-1');
+      const select2 = document.getElementById('compare-select-2');
+      
+      const optionsHTML = officialAiData.map(i => `<option value="${i.id}">${i.name} (${i.dev})</option>`).join('');
+      select1.innerHTML = optionsHTML;
+      select2.innerHTML = optionsHTML;
+
+      if (officialAiData.length > 1) {
+        select2.selectedIndex = 1;
+      }
+
+      updateComparison();
+      document.getElementById('compare-modal-backdrop').classList.remove('hidden');
+    }
+
+    function closeCompareModal() {
+      document.getElementById('compare-modal-backdrop').classList.add('hidden');
+    }
+
+    function updateComparison() {
+      const id1 = document.getElementById('compare-select-1').value;
+      const id2 = document.getElementById('compare-select-2').value;
+
+      const item1 = officialAiData.find(i => i.id === id1);
+      const item2 = officialAiData.find(i => i.id === id2);
+
+      const grid = document.getElementById('compare-results-grid');
+      grid.innerHTML = [item1, item2].map(item => `
+        <div class="bg-mono-950 border border-mono-800 rounded-xl p-4 space-y-4 shadow-sm">
+          <div>
+            <div class="flex justify-between items-start mb-1">
+              <h3 class="text-sm font-bold text-mono-50">${item.name}</h3>
+              <span class="text-[9px] bg-mono-850 text-mono-300 px-2 py-0.5 rounded border border-mono-700 font-mono">${item.type}</span>
+            </div>
+            <span class="text-xs font-mono text-mono-400 block">${item.dev}</span>
+          </div>
+
+          <div class="space-y-3 text-xs border-t border-mono-850 pt-3">
+            <div>
+              <span class="text-[10px] font-mono text-mono-500 uppercase block mb-1 font-semibold">Hosting & Deploy</span>
+              <span class="font-mono text-mono-200 bg-mono-900 px-2 py-1 rounded border border-mono-800 block">${item.deploy} • ${item.hosting}</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono text-mono-500 uppercase block mb-1 font-semibold">Architettura & Contesto</span>
+              <ul class="space-y-1 text-mono-300 bg-mono-900 p-2.5 rounded border border-mono-800">${item.arch.map(a => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[8px] text-mono-400"></i> ${a}</li>`).join('')}</ul>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono text-mono-500 uppercase block mb-1 font-semibold">Linguaggi & Coding</span>
+              <ul class="space-y-1 text-mono-300 bg-mono-900 p-2.5 rounded border border-mono-800">${item.prog.map(p => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[8px] text-mono-400"></i> ${p}</li>`).join('')}</ul>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono text-mono-500 uppercase block mb-1 font-semibold">Requisiti Hardware</span>
+              <ul class="space-y-1 text-mono-300 bg-mono-900 p-2.5 rounded border border-mono-800">${item.hw.map(h => `<li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[8px] text-mono-400"></i> ${h}</li>`).join('')}</ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function closeModal() {
+      document.getElementById('detail-modal-backdrop').classList.add('hidden');
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (open) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function switchPage(page) {
+      const pageModels = document.getElementById('page-models');
+      const pageUpcoming = document.getElementById('page-upcoming');
+      const btnModels = document.getElementById('nav-models');
+      const btnUpcoming = document.getElementById('nav-upcoming');
+      const titleHeader = document.getElementById('page-header-title');
+      const searchContainer = document.getElementById('header-search-container');
+
+      if (page === 'models') {
+        pageModels.classList.remove('hidden');
+        pageUpcoming.classList.add('hidden');
+        titleHeader.innerText = 'Zer0 Day AI • News & LLM';
+        searchContainer.classList.remove('hidden');
+        
+        btnModels.className = 'w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-50 bg-mono-800 transition flex items-center justify-between';
+        btnUpcoming.className = 'w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-400 hover:bg-mono-850 hover:text-mono-100 transition flex items-center justify-between';
+      } else {
+        pageModels.classList.add('hidden');
+        pageUpcoming.classList.remove('hidden');
+        pageUpcoming.classList.add('flex');
+        titleHeader.innerText = 'Zer0 Day AI • Prossimi LLM';
+        searchContainer.classList.add('hidden');
+        
+        btnUpcoming.className = 'w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-50 bg-mono-800 transition flex items-center justify-between';
+        btnModels.className = 'w-full text-left px-3.5 py-2 rounded-md font-medium text-mono-400 hover:bg-mono-850 hover:text-mono-100 transition flex items-center justify-between';
+      }
+      toggleSidebar(false);
+    }
+
+    function renderAIGrid(items) {
+      const grid = document.getElementById('aiGrid');
+      document.getElementById('model-count-label').innerText = `Modelli LLM in Catalogo: ${items.length}`;
+      
+      if (items.length === 0) {
+        grid.innerHTML = `<div class="text-xs text-mono-500 col-span-3 text-center py-10">Nessun modello trovato.</div>`;
+        return;
+      }
+      grid.innerHTML = items.map(item => `
+        <div onclick="openModal('${item.id}')" class="bg-mono-900 border border-mono-800 rounded-lg p-3 flex flex-col justify-between hover:border-mono-700 cursor-pointer transition group">
+          <div>
+            <div class="flex justify-between items-start mb-1.5">
+              <h3 class="font-medium text-mono-100 text-xs group-hover:text-mono-50 transition">${item.name}</h3>
+              <span class="text-[9px] bg-mono-800 text-mono-300 px-1.5 py-0.5 rounded border border-mono-700">${item.type}</span>
+            </div>
+            <span class="text-[11px] text-mono-400 block mb-1.5">${item.dev}</span>
+            <p class="text-mono-300 text-xs leading-relaxed mb-2">${item.desc}</p>
+          </div>
+          <div class="pt-2 border-t border-mono-850 flex justify-between items-center text-[10px] text-mono-500 group-hover:text-mono-300 transition">
+            <span class="uppercase font-mono">LLM • ${item.deploy}</span>
+            <span>Dettagli <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderUpcoming() {
+      const grid = document.getElementById('upcomingGrid');
+      grid.innerHTML = officialUpcomingData.map(item => `
+        <div class="bg-mono-900 border border-mono-800 rounded-lg p-3 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <h3 class="font-medium text-mono-100 text-xs">${item.name}</h3>
+              <span class="text-[9px] bg-mono-850 border border-mono-800 text-mono-300 px-1.5 py-0.5 rounded">${item.launch}</span>
+            </div>
+            <span class="text-[11px] text-mono-400 block mb-2">${item.dev}</span>
+            <p class="text-mono-300 text-xs leading-relaxed mb-3">${item.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterCategory(filterType, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = 'filter-btn bg-mono-850 text-mono-400 border border-mono-800 hover:text-mono-100 px-2.5 py-1 rounded text-[11px] transition';
+      });
+      btn.className = 'filter-btn bg-mono-100 text-mono-950 px-2.5 py-1 rounded text-[11px] font-medium transition';
+
+      if (filterType === 'all') {
+        renderAIGrid(officialAiData);
+      } else {
+        renderAIGrid(officialAiData.filter(i => i.type.toLowerCase() === filterType.toLowerCase()));
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      renderAIGrid(officialAiData.filter(i => 
+        i.name.toLowerCase().includes(query) || 
+        i.dev.toLowerCase().includes(query) ||
+        i.desc.toLowerCase().includes(query)
+      ));
+    });
+
+    window.onload = () => {
+      renderAIGrid(officialAiData);
+      renderUpcoming();
+    };
+  </script>
+</body>
+</html>
