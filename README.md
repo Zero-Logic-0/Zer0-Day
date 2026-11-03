@@ -1,4 +1,4 @@
-# ⚡ Zer0 Day AI
+# ⚡ Zer0-Day
 
 > **Il punto di riferimento indipendente per l'analisi, il confronto e il tracciamento in tempo reale dei modelli LLM.**
 
